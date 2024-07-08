@@ -1,7 +1,7 @@
 {
-  "name": "sandpack-file-explorer",
+  "name": "@yl/sandpack-file-explorer",
   "description": "A file explorer for Codesandbox's 'sandpack' code editor",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "author": "Aaron Powell",
   "license": "MIT",
   "keywords": [
@@ -107,6 +107,7 @@
     "@storybook/storybook-deployer": "2.8.16",
     "@storybook/testing-library": "0.0.14-next.1",
     "@types/jest": "29.2.3",
+    "@types/jquery": "3.5.29",
     "@types/node": "18.11.10",
     "@types/react": "18.0.26",
     "@types/react-dom": "18.0.9",
@@ -152,6 +153,7 @@
   },
   "dependencies": {
     "@minoru/react-dnd-treeview": "^3.4.0",
+    "jquery": "3.7.1",
     "react-dnd": "^16.0.1"
   }
 }

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   useSandpack,
   FileIcon,
@@ -16,9 +17,12 @@ import { DndProvider } from 'react-dnd';
 import { SingleInputForm } from './SingleInputForm';
 import { CreateNewNode } from './CreateNewNode';
 import { useSandpackFiles } from './SandpackFilesProvider';
-import { buildPath, getEntryFile } from './utils';
-import React from 'react';
+import { buildPath, getEntryFile, getDefaultFiles } from './utils';
 import { Item } from './types';
+import { getHiddenFiles } from './utils/getHiddenFiles';
+import $ from 'jquery';
+import './index.css';
+import { useState } from 'react';
 
 export const FileTreeExplorer = () => {
   const {
@@ -31,6 +35,8 @@ export const FileTreeExplorer = () => {
     setOpenDirs,
   } = useSandpackFiles();
   const { sandpack } = useSandpack();
+
+  const [selectDir, setSelectDir] = useState<string | null>();
 
   const immoveablePaths = ['/package.json'];
   const handleDrop = async (
@@ -75,6 +81,10 @@ export const FileTreeExplorer = () => {
   };
 
   const entryFile = getEntryFile(sandpack.files);
+  const defaultFiles = getDefaultFiles(sandpack.files);
+  const hiddenFiles = getHiddenFiles(sandpack.files);
+
+  console.log(treeData);
 
   return (
     <>
@@ -105,8 +115,8 @@ export const FileTreeExplorer = () => {
           >
             <span>Files</span>
             <div style={{ display: 'flex' }}>
-              <CreateNewNode />
-              <CreateNewNode dir={true} />
+              <CreateNewNode selectDir={selectDir} />
+              <CreateNewNode selectDir={selectDir} dir={true} />
             </div>
           </div>
           <Tree<{ path: string }>
@@ -116,22 +126,25 @@ export const FileTreeExplorer = () => {
             rootProps={{
               style: { listStyle: 'none', padding: '0', height: '100%' },
             }}
-            classes={{ root: 'test' }}
+            classes={{ root: 'test', listItem: 'list-item' }}
             enableAnimateExpand={true}
             insertDroppableFirst={true}
             sort={true}
             initialOpen={openDirs}
             // onChangeOpen={(e) => setOpenDirs(e as string[])}
             // initialOpen={openDirs} //treeData.map(({ id }) => id)}
-            render={(node, { depth, isOpen }) =>
-              !node.text ? (
+            render={(node, { depth, isOpen }) => {
+              console.log(node);
+              return !node.text ? (
                 <></>
               ) : (
                 <div
                   key={node.id}
                   style={{
                     marginLeft: depth * 10,
-                    display: 'flex',
+                    display: hiddenFiles.includes(node.data?.path ?? '')
+                      ? 'none'
+                      : 'flex',
                     justifyContent: 'space-between',
                     maxWidth: '300px',
                     overflow: 'hidden',
@@ -173,12 +186,32 @@ export const FileTreeExplorer = () => {
                     <>
                       {node.droppable ? (
                         <span
+                          data-path={
+                            node.data?.path ?? `${node.parent}/${node.text}`
+                          }
                           style={{
                             color: `var(--sp-colors-clickable)`,
                             display: 'flex',
                             cursor: 'pointer',
                           }}
-                          onClick={() => {
+                          onClick={(e) => {
+                            console.log(e);
+
+                            const span = $(e.target);
+                            const parent = span.parent('div');
+
+                            parent
+                              .parents('li')
+                              .children('div')
+                              .removeClass('active-item');
+
+                            parent.addClass('active-item');
+
+                            const dirPath = span.attr('data-path');
+                            console.log(dirPath);
+
+                            setSelectDir(dirPath + '/');
+
                             if (isOpen) {
                               setOpenDirs((prev) =>
                                 prev.filter((id) => id !== node.id)
@@ -210,6 +243,9 @@ export const FileTreeExplorer = () => {
                             <FileIcon />
                           </span>
                           <span
+                            data-path={
+                              node.data?.path ?? `${node.parent}/${node.text}`
+                            }
                             style={{
                               textOverflow: 'ellipsis',
                               maxWidth: '200px',
@@ -222,15 +258,29 @@ export const FileTreeExplorer = () => {
                               }`,
                               display: 'flex',
                             }}
-                            onClick={() =>
-                              sandpack.openFile(node?.data?.path as string)
-                            }
+                            onClick={(e) => {
+                              console.log(e);
+                              const span = e.target as HTMLElement;
+                              const parent = $(span).parents('.list-item');
+
+                              console.log(parent);
+                              parent
+                                .siblings('.list-item')
+                                .children('div')
+                                .removeClass('active-item');
+
+                              setSelectDir(null);
+                              sandpack.openFile(node?.data?.path as string);
+                            }}
+                            onDoubleClick={(e) => {
+                              console.log(e);
+                            }}
                           >
                             {node.text}
                           </span>
                         </span>
                       )}
-                      {![entryFile, '/package.json'].includes(
+                      {![entryFile, ...defaultFiles, '/package.json'].includes(
                         node?.data?.path ?? ''
                       ) ? (
                         <button
@@ -261,8 +311,8 @@ export const FileTreeExplorer = () => {
                     </>
                   ) : null}
                 </div>
-              )
-            }
+              );
+            }}
           />
         </div>
       </DndProvider>

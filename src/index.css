@@ -1,0 +1,7 @@
+.list-item {
+  color: orange;
+}
+
+.list-item .active-item {
+  border: 1px solid orange;
+}

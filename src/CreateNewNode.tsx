@@ -6,7 +6,13 @@ import {
 import React from 'react';
 import { useSandpackFiles } from './SandpackFilesProvider';
 
-export const CreateNewNode = ({ dir }: { dir?: boolean }) => {
+export const CreateNewNode = ({
+  dir,
+  selectDir,
+}: {
+  dir?: boolean;
+  selectDir?: string | null;
+}) => {
   const { sandpack } = useSandpack();
   const { addFile } = useSandpackFiles();
 
@@ -16,10 +22,13 @@ export const CreateNewNode = ({ dir }: { dir?: boolean }) => {
         cursor: 'pointer',
       }}
       onClick={() => {
-        const activeSpace = sandpack.activeFile
-          .split('/')
-          .slice(0, -1)
-          .join('/');
+        console.log(sandpack);
+        let activeFile = sandpack.activeFile;
+        if (selectDir) {
+          activeFile = selectDir;
+        }
+        const activeSpace = activeFile.split('/').slice(0, -1).join('/');
+
         addFile({
           [`${activeSpace}/${dir ? 'addDir' : 'addFile'}`]: {
             code: '.emptyDir',

@@ -10,3 +10,4 @@ export * from './getEntryFile';
 export * from './getRemovedKeys';
 export * from './mergeHierarchicalArray';
 export * from './removeHiddenEntries';
+export * from './getDefaultFiles';
